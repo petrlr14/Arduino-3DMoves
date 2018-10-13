@@ -41,7 +41,12 @@ void sumPos(int *pos) {
       *pos = *pos - 1;
       break;
   }
-  *pos = constrain(*pos, 0, 3);
+  if(*pos>3){
+      *pos=*pos-2;
+  }
+  if(*pos<0){
+      *pos=*pos+2;
+  }
 }
 
 void move() {
