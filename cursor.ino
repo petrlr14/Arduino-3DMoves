@@ -9,9 +9,16 @@
 #define XLEFT 12
 #define YDOWN 13
 
+#define SPEED 1000
+#define DSPEED 1
+
 int fieldMap[1][16] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
 int posX = 0, posY = 0, posZ = 0;
+
+int dPosX = 0, dPosY = 0, dPosZ = 0;
+
+int movimiento = 0;
 
 bool canPress[7] = {true, true, true, true, true, true};
 
@@ -37,27 +44,38 @@ void shiftHelper(int index) {
   digitalWrite(ST, 1);
 }
 
-void bottonHelper(int pin, int* data, int dx) {
+void bottonHelper(int pin, int* move, int con) {
   bool isPressed = digitalRead(pin);
   if (isPressed && canPress[pin - 7]) {
     canPress[pin - 7] = false;
-    *data+=dx;
-    *data=constrain(*data, 0, 3);
+    if (movimiento == pin) {
+      movimiento = 0;
+    } else {
+      movimiento = pin;
+    }
   }
   if (!isPressed && !canPress[pin - 7]) {
     canPress[pin - 7] = true;
   }
+
+  if (movimiento == pin) {
+    *move += (con * DSPEED);
+    *move=constrain(*move, 0, 3000);
+  }
 }
 
 void move() {
-  bottonHelper(ZUP, posZ, -1);
-  bottonHelper(ZDOWN, posZ, 1);
-  bottonHelper(XLEFT, posX, -1);
-  bottonHelper(YUP, posY, -1);
-  bottonHelper(XRIGHT, posX, 1);
-  bottonHelper(YDOWN, posY, 1);
+  bottonHelper(ZUP, &dPosZ, -1);
+  bottonHelper(ZDOWN, &dPosZ, 1);
+  bottonHelper(XLEFT, &dPosX, 1);
+  bottonHelper(YUP, &dPosY, -1);
+  bottonHelper(XRIGHT, &dPosX, -1);
+  bottonHelper(YDOWN, &dPosY, 1);
   cleanLayer();
   cleanPos(0);
+  posX=(dPosX/SPEED);
+  posY=(dPosY/SPEED);
+  posZ=(dPosZ/SPEED);
   fieldMap[0][posX + (posY * 4)] = 1;
   digitalWrite(posZ, LOW);
   shiftHelper(0);
@@ -73,6 +91,4 @@ void setup() {
   }
 }
 
-void loop() {
-  move();
-}
+void loop() { move(); }
