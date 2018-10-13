@@ -9,6 +9,8 @@ int fieldMap[1][16] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
 int posX = 0, posY = 0, posZ = 0;
 
+int cont = 0, rando = 0, rando2=0;
+
 void cleanPos(int index) {
   for (int i = 0; i < 16; i++) {
     fieldMap[index][i] = 0;
@@ -32,8 +34,13 @@ void shiftHelper(int index) {
 }
 
 void sumPos(int *pos) {
-  int rand = random(0, 2);
-  switch (rand) {
+  if(cont%2==0){
+      rando2 = random(0, 2);
+      if(*pos==3 || *pos==0){
+      rando2=!rando2;
+  }
+  }
+  switch (rando2) {
     case 0:
       *pos = *pos + 1;
       break;
@@ -41,19 +48,19 @@ void sumPos(int *pos) {
       *pos = *pos - 1;
       break;
   }
-  if(*pos>3){
-      *pos=*pos-2;
-  }
-  if(*pos<0){
-      *pos=*pos+2;
-  }
+  *pos=constrain(*pos, 0, 3);
 }
 
 void move() {
   cleanLayer();
   cleanPos(0);
-  int rand = random(0, 3);
-  switch (rand) {
+  fieldMap[0][posX + (posY * 4)] = 1;
+  digitalWrite(posZ, LOW);
+  shiftHelper(0);
+  if (cont % 2 == 0) {
+    rando = random(0, 3);
+  }
+  switch (rando) {
     case 0:
       sumPos(&posX);
       break;
@@ -64,10 +71,8 @@ void move() {
       sumPos(&posZ);
       break;
   }
-  fieldMap[0][posX + (posY * 4)] = 1;
-  digitalWrite(posZ, LOW);
-  shiftHelper(0);
   delay(500);
+  cont = cont + 1;
 }
 
 void setup() {
